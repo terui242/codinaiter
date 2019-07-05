@@ -1,0 +1,18 @@
+p.sample1{
+	text-align:center; 
+	font-size: 500%;
+}
+
+.shadow {
+	height: 100px;
+  width:200px;
+  font-size:40px;
+  color:#FFFFFF;
+  text-align:center;
+  display:block;
+  padding:10px 0 10px;
+  background:#6BCBF6;
+  border-radius:5px;
+  box-shadow:1px 1px #1A6EA0;
+}
+
