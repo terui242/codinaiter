@@ -1,21 +1,146 @@
 import cgi
 import psycopg2
 import random
+
 form = cgi.FieldStorage()
 
-conn = psycopg2.connect("dbname=test user=postgres password=password")
+# 質問テーブルの質問をselect
+conn = psycopg2.connect("dbname=codi user=postgres password=password")
 cur = conn.cursor()
-cur.execute("select question_id,question from question")
+cur.execute("select question_id,question from question order by question_id asc")
 
+# #作業用テーブル作成
+# # work_conn = psycopg2.connect("dbname=prac user=postgres password=password")
+work_cur = conn.cursor()
+work_cur.execute("select * from information_schema.tables where table_name=%s", ('work',))
+table_exist = bool(work_cur.rowcount)
+print(table_exist)
+
+#answerテーブル作成
+answer_cur  = conn.cursor()
+answer_cur.execute("select student_id,sum(answer) as sum_ans from answer group by student_id order by student_id asc")
+
+# 質問文を変数へ追加
+answer_list = []
+for answer_row in answer_cur:
+    answer_list.append((answer_row[1]))
+
+print(answer_list)
+if table_exist == False:
+    sql = 'create table work(id SERIAL NOT NULL PRIMARY KEY, sum int)'
+    work_cur.execute(sql)
+else:
+    table_exist = True
+
+action_url = ""
+
+
+# 質問文を変数へ追加
 question_list = []
-# for row in cur:
-#     question_list.append((row[0]))
+next_question = 0
+for row in cur:
+    question_list.append((row[1]))
 
-que = random.choice(question_list)
+answer = form.getvalue('answer', '-10')
 
 
-answer = form.getvalue('answer','')
 
+# 作業用テーブルへ追加
+sql_insert = "insert into work(sum) values(" + answer + ")"
+work_cur.execute(sql_insert)
+
+sql_select = 'select id,sum from work order by id asc'
+work_cur.execute(sql_select)
+
+# 作業用の中身を表示
+work_list = []
+workid_list = []
+for work_row in work_cur:
+    work_list.append((work_row[1]))
+    workid_list.append((work_row[0]))
+
+work_index = len(workid_list) - 1
+
+que_index = work_index
+maina = "-10"
+
+href_url = ""
+# 映画の分岐
+if que_index == 6:
+    if work_list[6] == -10:
+        que_index = 16
+        # 作業用テーブルへ追加
+        for eiga_row in range(10):
+            sql_insert = "insert into work(sum) values(" + maina + ")"
+            work_cur.execute(sql_insert)
+    else:
+        print("-10以外！")
+#音楽の分岐
+if que_index == 17:
+    if work_list[17] == -10:
+        que_index = 26
+        # 作業用テーブルへ追加
+        for eiga_row in range(9):
+            sql_insert = "insert into work(sum) values(" + maina + ")"
+            work_cur.execute(sql_insert)
+    else:
+        print("-10以外！")
+#ゲームの分岐
+if que_index == 27:
+    if work_list[27] == -10:
+        que_index = 33
+        # 作業用テーブルへ追加
+        for eiga_row in range(6):
+            sql_insert = "insert into work(sum) values(" + maina + ")"
+            work_cur.execute(sql_insert)
+    else:
+        print("-10以外！")
+#スポーツの分岐
+if que_index == 34:
+    if work_list[34] == -10:
+        que_index = 46
+        # 作業用テーブルへ追加
+        for eiga_row in range(12):
+            sql_insert = "insert into work(sum) values(" + maina + ")"
+            work_cur.execute(sql_insert)
+    else:
+        print("-10以外！")
+print(question_list[57])
+#ラーメンの分岐
+if que_index == 47:
+    if work_list[47] == -10:
+        que_index = 58
+        # 作業用テーブルへ追加
+        for eiga_row in range(5):
+            sql_insert = "insert into work(sum) values(" + maina + ")"
+            work_cur.execute(sql_insert)
+    else:
+        print("-10以外！")
+#旅行の分岐
+if que_index == 53:
+    if work_list[53] == -10:
+        action_url = 'n.py'
+        # href_url = "localhost.href='/aaa/index.html'"
+        # 作業用テーブルへ追加
+        for eiga_row in range(6):
+            sql_insert = "insert into work(sum) values(" + maina + ")"
+            work_cur.execute(sql_insert)
+if que_index == 57 :
+        action_url = 'n.py'
+        # href_url = "localhost.href='/aaa/index.html'"
+
+work_sum = 0
+
+for work_test in work_list:
+    work_sum = work_test + work_sum
+
+# que = random.choice(question_list)
+que = question_list[que_index]
+
+print(work_list)
+print(len(workid_list) - 1)
+print(next_question)
+print(work_sum - work_list[0])
 
 print("Content-Type: text/html; charset=utf-8")
 print("""
@@ -39,12 +164,12 @@ print("""
 <div class="flex">
 	<div class="ido">
 			<div class="question_box">
-    		<p id="question_text">{que}</p>
+    		<p id="question_text" class="text-monospace">{que}</p>
 			</div>
-            <form method="POST" action="">
+            <form method="POST" action="{action_url}">
 			<div class="question_btn">
-				<button type="submit" class="yes_btn" value="10" name="answer">はい</button>
-				<button type="submit" class="no_btn" value="-10" name="answer">いいえ</button>
+				<button class="yes_btn" value="10" name="answer" onclick="{href_url}">はい</button>
+				<button class="no_btn" value="-10" name="answer" onclick="{href_url}">いいえ</button>
 			</div>
 
 			<div class="btn-group dropright">
@@ -56,10 +181,10 @@ print("""
   		    		<button class="dropdown-item" href="#" value="0" name="answer">分からない</button>
   		    		<button class="dropdown-item" href="#" value="-5" name="answer">多分いいえ</button>
   			    </div>
-  			    
+
 			</div>
 		    </form>
-		
+
 
 		</div>
 		<img class="form_image" src="../css/12.png">
@@ -74,7 +199,7 @@ print("""
 <script>
  console.log({answer})
 </script>
-""".format(que=que,answer=answer))
+""".format(que=que, answer=answer,action_url=action_url,href_url=href_url))
 
 # <script>
 # 			var que_array = ['１年生ですか？','2年生ですか？','高度職業実践科ですか？','webCGクリエイターコースですか？','アプリ開発コースですか？','音楽をよく聞きますか？'];
@@ -88,4 +213,4 @@ print("""
 # </body>
 # </html>
 
-
+conn.commit()

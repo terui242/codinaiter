@@ -34,6 +34,9 @@ body{
 .question_box p {
     padding-top: 10%;
 }
+#question_text{
+    font-size:1.5rem;
+}
 .flex{
 	display: flex;
 	flex-wrap: wrap;
