@@ -27,6 +27,7 @@ print("""
   </head>
   <body>
     <p class="sample1">学生のことならな～んでも知ってます～！</p>
+		<p class="sample1">test_umi！</p>
 		<button class="shadow">トップへ</button>
   </body>
 </html>""")
